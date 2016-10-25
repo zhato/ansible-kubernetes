@@ -1,0 +1,5 @@
+---
+- include: docker.yaml
+- include: kubelet.yaml
+- include: masters.yaml
+- include: minions.yaml

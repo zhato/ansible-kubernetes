@@ -1,0 +1,25 @@
+---
+# TODO figure out a way of restarting the various pods
+# when these keys are updated
+
+- name: make /etc/kubernetes/pki/[ kube-proxy ] directories
+  file: path=/etc/kubernetes/pki/{{ item }} state=directory
+  with_items:
+    - kube-proxy
+
+- name: copy kubeconfig for minion components
+  template: src=kubeconfig dest=/etc/kubernetes/pki/{{ item }}/kubeconfig
+  with_items:
+    - kube-proxy
+
+- name: copy kube-proxy credentials
+  copy: src={{env_dir}}/pki/{{item}} dest=/etc/kubernetes/pki/kube-proxy/{{ item | basename }}
+  with_items:
+    - ca.crt
+    - issued/kube-proxy-{{ ansible_hostname }}.crt
+    - private/kube-proxy-{{ ansible_hostname }}.key
+
+- name: copy kubernetes minion config
+  template: src={{ item }} dest=/etc/kubernetes/manifests/{{ item }}
+  with_items:
+    - kube-proxy.yaml

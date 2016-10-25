@@ -1,0 +1,35 @@
+---
+- name: install docker repo prerequisites
+  apt: name={{item}} state=installed update_cache=yes
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - linux-image-extra-{{ ansible_kernel }}
+    - linux-image-extra-virtual
+
+- name: install docker apt key
+  apt_key: keyserver=hkp://p80.pool.sks-keyservers.net:80 id=58118E89F3A912897C070ADBF76221572C52609D
+
+- name: add docker repo
+  apt_repository: repo='deb https://apt.dockerproject.org/repo ubuntu-xenial main' state=present
+
+- name: install docker
+  apt: name={{item}} state=installed update_cache=yes
+  with_items:
+    - docker-engine={{docker_version}}
+
+- name: create cbr0 bridge
+  copy: src=100-cbr0.cfg dest=/etc/network/interfaces.d/
+  notify:
+    - up cbr0
+    - restart docker
+
+- name: copy docker systemd drop in
+  copy: src=10-docker.conf dest=/etc/systemd/system/docker.service.d/
+  notify:
+    - restart docker
+
+- name: start docker and make sure it loads on restart
+  service:
+    name: docker
+    enabled: yes

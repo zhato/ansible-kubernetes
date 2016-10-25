@@ -1,0 +1,42 @@
+---
+- name: install kubernetes apt key
+  apt_key: url=https://packages.cloud.google.com/apt/doc/apt-key.gpg state=present
+
+- name: add kubernetes repo
+  apt_repository: repo='deb http://apt.kubernetes.io/ kubernetes-xenial main' state=present
+
+- name: install common kubernetes components
+  apt: name={{item}} state=installed update_cache=yes
+  with_items:
+    - kubelet={{kubernetes_version}}
+    - kubernetes-cni={{kubernetes_cni_version}}
+
+- name: copy kubelet systemd drop in
+  template: src=10-kubelet.conf dest=/etc/systemd/system/kubelet.service.d/10-kubelet.conf
+  notify:
+    - restart kubelet
+
+- name: copy kubelet config
+  template: src=kubelet.conf dest=/etc/kubernetes/kubelet.conf
+  notify:
+    - restart kubelet
+
+- name: make kubernetes pki directory
+  file: path=/etc/kubernetes/pki state=directory
+  notify:
+    - restart kubelet
+
+- name: copy kubelet credentials
+  copy: src={{env_dir}}/pki/{{item}} dest=/etc/kubernetes/pki/{{item | basename}}
+  with_items:
+    - issued/kubelet-{{ ansible_hostname }}.crt
+    - private/kubelet-{{ ansible_hostname }}.key
+    - ca.crt
+  notify:
+    - restart kubelet
+
+- name: start kubelet and make sure it loads on restart
+  service:
+    name: kubelet
+    state: started
+    enabled: yes

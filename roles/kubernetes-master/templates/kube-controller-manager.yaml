@@ -1,0 +1,53 @@
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: kube-controller-manager
+  namespace: kube-system
+  labels:
+    component: kube-controller-manager
+    tier: control-plane
+spec:
+  hostNetwork: true
+  containers:
+  - name: kube-controller-manager
+    image: gcr.io/google_containers/kube-controller-manager-amd64:{{ kubernetes_image_version }}
+    command:
+    - /usr/local/bin/kube-controller-manager
+    - --v=4
+    - --address=127.0.0.1
+    - --kubeconfig=/etc/kubernetes/pki/controller-manager/kubeconfig
+
+    # Flags to make service accounts work
+    - --root-ca-file=/etc/kubernetes/pki/controller-manager/ca.crt
+    - --service-account-private-key-file=/etc/kubernetes/pki/controller-manager/service-accounts-{{ ansible_hostname }}.key
+
+    # Pod networking
+    - --allocate-node-cidrs=true
+    - --cluster-cidr={{ pod_cidr }}
+    - --service-cluster-ip-range=10.0.0.0/16
+    - --cloud-provider=aws
+    - --cluster-name=kubernetes_{{ env_name }}
+    resources:
+      requests:
+        cpu: 200m
+    livenessProbe:
+      httpGet:
+        path: "/healthz"
+        port: 10252
+        host: 127.0.0.1
+      initialDelaySeconds: 15
+      timeoutSeconds: 15
+    volumeMounts:
+    - name: certs
+      mountPath: /etc/ssl/certs
+    - name: pki-controller-manager
+      readOnly: true
+      mountPath: /etc/kubernetes/pki/controller-manager
+  volumes:
+  - name: certs
+    hostPath:
+      path: /etc/ssl/certs
+  - name: pki-controller-manager
+    hostPath:
+      path: /etc/kubernetes/pki/controller-manager

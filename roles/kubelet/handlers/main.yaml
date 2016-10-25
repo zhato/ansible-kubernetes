@@ -1,0 +1,18 @@
+---
+- name: restart kubelet
+  become: true
+  command: systemctl daemon-reload
+  notify: restart kubelet step 2
+
+- name: restart kubelet step 2
+  become: true
+  command: systemctl restart kubelet
+
+- name: restart docker
+  become: true
+  command: systemctl daemon-reload
+  notify: restart docker step 2
+
+- name: restart docker step 2
+  become: true
+  command: systemctl restart docker

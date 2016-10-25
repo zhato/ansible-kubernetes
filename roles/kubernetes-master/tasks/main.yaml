@@ -1,0 +1,45 @@
+---
+# TODO figure out a way of restarting the various pods
+# when these keys are updated
+
+- name: copy apiserver credentials
+  copy: src={{env_dir}}/pki/{{item}} dest=/etc/kubernetes/pki/{{ item | basename }}
+  with_items:
+    - ca.crt
+    - issued/apiserver-{{ ansible_hostname }}.crt
+    - private/apiserver-{{ ansible_hostname }}.key
+
+- name: make /etc/kubernetes/pki/[controller-manager, scheduler] directories
+  file: path=/etc/kubernetes/pki/{{ item }} state=directory
+  with_items:
+    - controller-manager
+    - scheduler
+
+- name: copy kubeconfig for master components
+  template: src=kubeconfig dest=/etc/kubernetes/pki/{{ item }}/kubeconfig
+  with_items:
+    - controller-manager
+    - scheduler
+
+- name: copy controller-manager credentials
+  copy: src={{env_dir}}/pki/{{item}} dest=/etc/kubernetes/pki/controller-manager/{{ item | basename }}
+  with_items:
+    - ca.crt
+    - issued/controller-manager-{{ ansible_hostname }}.crt
+    - private/controller-manager-{{ ansible_hostname }}.key
+    - private/service-accounts-{{ ansible_hostname }}.key
+
+- name: copy scheduler credentials
+  copy: src={{env_dir}}/pki/{{item}} dest=/etc/kubernetes/pki/scheduler/{{ item | basename }}
+  with_items:
+    - ca.crt
+    - issued/scheduler-{{ ansible_hostname }}.crt
+    - private/scheduler-{{ ansible_hostname }}.key
+
+- name: copy kubernetes master config
+  template: src={{ item }} dest=/etc/kubernetes/manifests/{{ item }}
+  with_items:
+    - etcd.yaml
+    - kube-apiserver.yaml
+    - kube-controller-manager.yaml
+    - kube-scheduler.yaml
