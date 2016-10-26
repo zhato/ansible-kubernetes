@@ -11,6 +11,9 @@
     - kubelet={{kubernetes_version}}
     - kubernetes-cni={{kubernetes_cni_version}}
 
+- name: mkdir /etc/systemd/system/kubelet.service.d
+  file: path=/etc/systemd/system/kubelet.service.d state=directory
+
 - name: copy kubelet systemd drop in
   template: src=10-kubelet.conf dest=/etc/systemd/system/kubelet.service.d/10-kubelet.conf
   notify:

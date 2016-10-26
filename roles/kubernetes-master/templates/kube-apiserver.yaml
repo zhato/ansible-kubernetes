@@ -21,6 +21,7 @@ spec:
     - --client-ca-file=/etc/kubernetes/pki/ca.crt
     - --tls-cert-file=/etc/kubernetes/pki/apiserver-{{ ansible_hostname }}.crt
     - --tls-private-key-file=/etc/kubernetes/pki/apiserver-{{ ansible_hostname }}.key
+    - --service-account-key-file=/etc/kubernetes/pki/controller-manager/service-accounts-{{ ansible_hostname }}.key
 
     - --etcd-servers=http://127.0.0.1:2379
 
