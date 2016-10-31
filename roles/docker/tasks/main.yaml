@@ -22,12 +22,13 @@
   copy: src=100-cbr0.cfg dest=/etc/network/interfaces.d/
   notify:
     - up cbr0
-    - restart docker
+    - docker restart
 
 - name: copy docker systemd drop in
   copy: src=10-docker.conf dest=/etc/systemd/system/docker.service.d/
   notify:
-    - restart docker
+    - docker reload
+    - docker restart
 
 - name: start docker and make sure it loads on restart
   service:

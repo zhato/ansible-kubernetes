@@ -23,7 +23,6 @@ spec:
     - --service-account-private-key-file=/etc/kubernetes/pki/controller-manager/service-accounts-{{ ansible_hostname }}.key
 
     # Pod networking
-    - --allocate-node-cidrs=true
     - --cluster-cidr={{ pod_cidr }}
     - --service-cluster-ip-range=10.0.0.0/16
     - --cloud-provider=aws

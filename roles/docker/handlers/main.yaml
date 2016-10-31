@@ -1,14 +1,14 @@
 ---
-- name: restart docker
-  become: true
-  command: systemctl daemon-reload
-  notify: restart docker step 2
-
-- name: restart docker step 2
-  become: true
-  command: systemctl restart docker
-
 # See https://github.com/kubernetes/kubernetes/issues/33789
 - name: up cbr0
   become: true
-  command: ( ifdown cbr0 || true ) && ifup cbr0
+  command: /bin/sh -c "( ifdown cbr0 || true ) && ifup cbr0"
+
+- name: docker reload
+  become: true
+  command: systemctl daemon-reload
+
+- name: docker restart
+  become: true
+  command: systemctl restart docker
+
