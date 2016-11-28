@@ -6,7 +6,7 @@
   apt_repository: repo='deb http://apt.kubernetes.io/ kubernetes-xenial main' state=present
 
 - name: install common kubernetes components
-  apt: name={{item}} state=installed update_cache=yes
+  apt: name={{item}} state=present update_cache=no
   with_items:
     - kubelet={{kubernetes_version}}
     - kubernetes-cni={{kubernetes_cni_version}}

@@ -7,6 +7,7 @@ metadata:
   labels:
     tier: node
     component: kube-proxy
+    ignore_on_drain: "true"
 spec:
   hostNetwork: true
   containers:
