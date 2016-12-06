@@ -27,7 +27,7 @@
     - ca.crt
     - issued/controller-manager-{{ ansible_hostname }}.crt
     - private/controller-manager-{{ ansible_hostname }}.key
-    - private/service-accounts-{{ ansible_hostname }}.key
+    - private/service-accounts.key
 
 - name: copy scheduler credentials
   copy: src={{env_dir}}/pki/{{item}} dest=/etc/kubernetes/pki/scheduler/{{ item | basename }}

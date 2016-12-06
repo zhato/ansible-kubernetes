@@ -5,8 +5,7 @@ metadata:
   name: kube-controller-manager
   namespace: kube-system
   labels:
-    component: kube-controller-manager
-    tier: control-plane
+    name: kube-controller-manager
 spec:
   hostNetwork: true
   containers:
@@ -14,13 +13,16 @@ spec:
     image: gcr.io/google_containers/kube-controller-manager-amd64:{{ kubernetes_image_version }}
     command:
     - /usr/local/bin/kube-controller-manager
+    args:
     - --v=4
-    - --address=127.0.0.1
+    - --leader-elect=true
+    - --address=0.0.0.0
+    - --port=10252
     - --kubeconfig=/etc/kubernetes/pki/controller-manager/kubeconfig
 
     # Flags to make service accounts work
     - --root-ca-file=/etc/kubernetes/pki/controller-manager/ca.crt
-    - --service-account-private-key-file=/etc/kubernetes/pki/controller-manager/service-accounts-{{ ansible_hostname }}.key
+    - --service-account-private-key-file=/etc/kubernetes/pki/controller-manager/service-accounts.key
 
     # Pod networking
     - --cluster-cidr={{ pod_cidr }}
@@ -37,12 +39,16 @@ spec:
         host: 127.0.0.1
       initialDelaySeconds: 15
       timeoutSeconds: 15
+    ports:
+    - containerPort: 10252
+      hostPort: 10252
     volumeMounts:
     - name: certs
       mountPath: /etc/ssl/certs
-    - name: pki-controller-manager
       readOnly: true
+    - name: pki-controller-manager
       mountPath: /etc/kubernetes/pki/controller-manager
+      readOnly: true
   volumes:
   - name: certs
     hostPath:

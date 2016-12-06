@@ -5,8 +5,9 @@ metadata:
   name: etcd
   namespace: kube-system
   labels:
-    component: etcd
-    tier: control-plane
+    name: etcd
+  annotations:
+    prometheus.io.port: "2379"
 spec:
   hostNetwork: true
   containers:
@@ -14,22 +15,31 @@ spec:
     image: gcr.io/google_containers/etcd-amd64:2.2.5
     command:
     - etcd
-    - --listen-client-urls=http://127.0.0.1:2379
-    - --advertise-client-urls=http://127.0.0.1:2379
+    args:
+    - --name={{ private_hostname }}
+    - --listen-peer-urls=http://{{ ansible_default_ipv4["address"] }}:2380
+    - --listen-client-urls=http://{{ ansible_default_ipv4["address"] }}:2379,http://127.0.0.1:2379
     - --data-dir=/var/etcd/data
+    - --advertise-client-urls=http://{{ private_hostname }}:2379
+    - --initial-advertise-peer-urls=http://{{ private_hostname }}:2380
+    - --initial-cluster-state=new
+    - --initial-cluster={{ groups['master'] | map('extract', hostvars, 'private_hostname') | map('regex_replace', '(.*)', '\\1=http://\\1:2380') | join(',') }}
     resources:
       requests:
         cpu: 200m
+    ports:
+    - containerPort: 2380
+      hostPort: 2380
+      name: serverport
+    - containerPort: 2379
+      hostPort: 2379
+      name: clientport
     volumeMounts:
     - name: etcd
       mountPath: "/var/etcd"
-    livenessProbe:
-      httpGet:
-        path: "/health"
-        port: 2379
-        host: 127.0.0.1
-      initialDelaySeconds: 15
-      timeoutSeconds: 15
+    - mountPath: /etc/ssl
+      name: etcssl
+      readOnly: true
     securityContext:
       seLinuxOptions:
         type: unconfined_t
@@ -37,4 +47,6 @@ spec:
   - name: etcd
     hostPath:
       path: "/var/lib/etcd"
-
+  - name: etcssl
+    hostPath:
+      path: /etc/ssl

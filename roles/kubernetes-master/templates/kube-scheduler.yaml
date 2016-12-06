@@ -5,8 +5,7 @@ metadata:
   name: kube-scheduler
   namespace: kube-system
   labels:
-    component: kube-scheduler
-    tier: control-plane
+    name: kube-scheduler
 spec:
   hostNetwork: true
   containers:
@@ -14,8 +13,11 @@ spec:
     image: gcr.io/google_containers/kube-scheduler-amd64:{{ kubernetes_image_version }}
     command:
     - /usr/local/bin/kube-scheduler
+    args:
     - --v=4
-    - --address=127.0.0.1
+    - --leader-elect=true
+    - --address=0.0.0.0
+    - --port=10251
     - --leader-elect
     - --kubeconfig=/etc/kubernetes/pki/scheduler/kubeconfig
     resources:
@@ -28,10 +30,13 @@ spec:
         host: 127.0.0.1
       initialDelaySeconds: 15
       timeoutSeconds: 15
+    ports:
+    - containerPort: 10251
+      hostPort: 10251
     volumeMounts:
     - name: pki
-      readOnly: true
       mountPath: /etc/kubernetes/pki/scheduler
+      readOnly: true
   volumes:
   - name: pki
     hostPath:

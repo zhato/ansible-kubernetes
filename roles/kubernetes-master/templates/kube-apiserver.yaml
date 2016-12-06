@@ -4,9 +4,6 @@ apiVersion: v1
 metadata:
   name: kube-apiserver
   namespace: kube-system
-  labels:
-    component: kube-apiserver
-    tier: control-plane
 spec:
   hostNetwork: true
   containers:
@@ -14,6 +11,7 @@ spec:
     image: gcr.io/google_containers/kube-apiserver-amd64:{{ kubernetes_image_version }}
     command:
     - /usr/local/bin/kube-apiserver
+    args:
     - --v=4
 
     - --insecure-bind-address=127.0.0.1
@@ -21,9 +19,11 @@ spec:
     - --client-ca-file=/etc/kubernetes/pki/ca.crt
     - --tls-cert-file=/etc/kubernetes/pki/apiserver-{{ ansible_hostname }}.crt
     - --tls-private-key-file=/etc/kubernetes/pki/apiserver-{{ ansible_hostname }}.key
-    - --service-account-key-file=/etc/kubernetes/pki/controller-manager/service-accounts-{{ ansible_hostname }}.key
+    - --service-account-key-file=/etc/kubernetes/pki/controller-manager/service-accounts.key
 
-    - --etcd-servers=http://127.0.0.1:2379
+    # Clustering config
+    - --etcd-servers={{ groups['master'] | map('extract', hostvars, 'private_hostname') | map('regex_replace', '(.*)', 'http://\\1:2379') | join(',') }}
+    - --apiserver-count={{ groups['master'] | length }}
 
     - --cloud-provider=aws
     - --service-cluster-ip-range=10.0.0.0/16
@@ -36,6 +36,7 @@ spec:
     volumeMounts:
     - name: certs
       mountPath: /etc/ssl/certs
+      readOnly: true
     - name: pki
       readOnly: true
       mountPath: /etc/kubernetes/
