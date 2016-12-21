@@ -1,0 +1,4 @@
+---
+- name: logrotate
+  become: true
+  command: /etc/cron.daily/logrotate
