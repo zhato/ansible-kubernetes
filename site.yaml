@@ -4,3 +4,4 @@
 - include: kubelet.yaml
 - include: masters.yaml
 - include: minions.yaml
+- include: logrotate.yaml
