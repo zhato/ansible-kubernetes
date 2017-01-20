@@ -1,9 +1,14 @@
 ---
 - name: install kubernetes apt key
-  apt_key: url=https://packages.cloud.google.com/apt/doc/apt-key.gpg state=present
+  apt_key:
+    state: present
+    data: "{{ lookup('file', 'weaveworks-apt-signing.key') }}"
+
+- name: remove old kubernetes repo
+  apt_repository: repo='deb http://apt.kubernetes.io/ kubernetes-xenial main' state=absent
 
 - name: add kubernetes repo
-  apt_repository: repo='deb http://apt.kubernetes.io/ kubernetes-xenial main' state=present
+  apt_repository: repo='deb http://weaveworks-apt-repo.s3-website-us-east-1.amazonaws.com/ stable main' state=present
 
 - name: install common kubernetes components
   apt: name={{item}} state=present update_cache=no
