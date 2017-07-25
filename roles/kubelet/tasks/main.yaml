@@ -13,8 +13,8 @@
 - name: install common kubernetes components
   apt: name={{item}} state=present update_cache=yes
   with_items:
-    - kubelet={{kubernetes_version}}
-    - kubernetes-cni={{kubernetes_cni_version}}
+    - kubelet={{kubernetes_versions[hostk8s|default(defaultk8s)]["kubelet"]}}
+    - kubernetes-cni={{kubernetes_versions[hostk8s|default(defaultk8s)]["cni"]}}
 
 - name: mkdir /etc/systemd/system/kubelet.service.d
   file: path=/etc/systemd/system/kubelet.service.d state=directory

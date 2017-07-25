@@ -12,7 +12,7 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-proxy
-    image: gcr.io/google_containers/kube-proxy-amd64:{{ kubernetes_image_version }}
+    image: gcr.io/google_containers/kube-proxy-amd64:{{ kubernetes_versions[hostk8s|default(defaultk8s)]["images"] }}
     resources:
       requests:
         cpu: 100m

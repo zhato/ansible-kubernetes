@@ -10,7 +10,7 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-scheduler
-    image: gcr.io/google_containers/kube-scheduler-amd64:{{ kubernetes_image_version }}
+    image: gcr.io/google_containers/kube-scheduler-amd64:{{ kubernetes_versions[hostk8s|default(defaultk8s)]["images"] }}
     command:
     - /usr/local/bin/kube-scheduler
     args:
