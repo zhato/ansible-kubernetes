@@ -30,6 +30,10 @@ spec:
     - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota
     - --allow-privileged
 
+    # Override new k8s 1.6 defaults
+    - --storage-backend=etcd2
+    - --storage-media-type=application/json
+
     resources:
       requests:
         cpu: 250m
