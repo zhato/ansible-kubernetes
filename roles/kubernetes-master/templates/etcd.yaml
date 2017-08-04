@@ -12,7 +12,7 @@ spec:
   hostNetwork: true
   containers:
   - name: etcd
-    image: gcr.io/google_containers/etcd-amd64:2.2.5
+    image: gcr.io/google_containers/etcd-amd64:{{ kubernetes_versions[hostk8s|default(defaultk8s)]["etcd"] }}
     command:
     - etcd
     args:
