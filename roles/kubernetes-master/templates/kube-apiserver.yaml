@@ -31,8 +31,8 @@ spec:
     - --allow-privileged
 
     # Override new k8s 1.6 defaults
-    - --storage-backend=etcd2
-    - --storage-media-type=application/json
+    - --storage-backend={{ kubernetes_versions[hostk8s|default(defaultk8s)]["storage-backend"] }}
+    - --storage-media-type={{ kubernetes_versions[hostk8s|default(defaultk8s)]["storage-media-type"] }}
 
     resources:
       requests:
